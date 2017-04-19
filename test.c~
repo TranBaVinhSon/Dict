@@ -1,0 +1,18 @@
+#include <string.h>
+#include "btree.h"
+#include <stdio.h>
+main()
+{
+	char s1[30],s2[10000];
+	BTA *p;
+	int d,i;
+	printf("s=");
+	gets(s1);
+	btpos(p,1);
+	p = btopn("tdanhviet",0,0);
+	if(p==NULL) puts("@@");
+	d = btsel(p,s1,s2,10000,&i);
+	if (d!=0) puts("Khong Co!");
+	else puts(s2);
+	btcls(p);
+}

@@ -1,0 +1,158 @@
+# include<stdio.h>
+# include<string.h>
+# include<stdlib.h>
+# include<btree.h>
+
+void read_file()
+{
+  BTA *ev;
+  char word[200];
+  char s[100], s1[100];
+  int i, j, k, n, m;
+  char ch;
+  btinit();
+  ev = btcrt("data.dat", 0, 0);
+  FILE *f;
+  f=fopen("anhviet109K.index", "r");
+  while(1)
+    {
+      fgets(word, 200, f);
+      word[strlen(word)-1]= '\0';
+      if(feof(f)!=0) break;
+      i=j=0;
+      while(word[i]!='\t')
+	s[j++] = word[i++];
+      s[j]='\0';
+      i++;
+      j=0;
+      while(word[i]!='\0')
+	s1[j++]=word[i++];
+      s1[j] = '\0';
+      btins(ev, s, s1, 40);
+      printf("%s\t%s\n",s,s1);
+    }
+  btcls(ev);
+  fclose(f);
+}
+//############################################################################
+int luythua(int a, int b)
+{
+  float c;
+  int i;
+  c = 1;
+  for(i=0;i<b;i++)
+    c = c*a;
+  return c;
+}
+//############################################################################
+int doicoso(char *s)
+{
+  char s1[64];
+  int i, i1, n, n1, k;
+  long v, vt=0;
+  strcpy(s1,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+  n = strlen(s);
+  n1 = strlen(s1);
+  for(i=0;i<n;i++)
+    {
+      for(i1=0;i1<n1;i1++)
+	if(s[i]==s1[i1])
+	  {
+	    v = luythua(64, n-i-1);
+	    v = v*i1;
+	  }
+      vt = vt+v;
+    }
+
+  return vt;
+}
+//############################################################################
+void tachxau(char s[], char s1[], char s2[])
+{
+  int i, n;
+  i=0;
+  while(s[i]!='\t') {
+    s1[i] = s[i];
+    i++; }
+  s1[i] = '\0';
+  i++;
+  n = 0;
+  while(s[i]!='\0') {
+    s2[n] = s[i];
+    n++;
+    i++;  }
+  s2[n] = '\0';
+  printf("S1: %s\tS2: %s\n", s1, s2);
+}
+//############################################################################
+char *read_mean(char *s)
+{
+  char s1[50], s2[50];
+  char *text;
+  int n, i, ltinh=1;
+  long vt, kt;
+  FILE *f;
+  tachxau(s, s1, s2);
+  vt = doicoso(s1);
+  kt = doicoso(s2);
+  if(ltinh!=0) {
+  if((f=fopen("anhviet109K.dict", "r"))==NULL)
+    printf("Khong mo duoc file nghia\n");
+  else
+    {
+      text = (char*)malloc(kt*sizeof(char)+10);
+      if(text==NULL)
+	printf("Cap phat that bai\n");
+      n = fseek(f, vt, 0);
+      printf("ktra fseek: %d\n", n);
+      n = fread(text, sizeof(char), kt, f);
+      text[n*sizeof(char)]='\0';
+      return text;
+    }
+  }
+}
+char *soundex(const char *in)
+{
+   static  int code[] =
+      {  0,1,2,3,0,1,2,0,0,2,2,4,5,5,0,1,2,6,2,3,0,1,0,2,0,2 };
+      /* a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z */
+   static  char key[5];
+   register        char ch;
+   register        int last;
+   register        int count;
+
+   /* Set up default key, complete with trailing '0's */
+   strcpy(key, "Z000");
+
+   /* Advance to the first letter.  If none present, 
+      return default key */
+   while (*in != '\0'  &&  !isalpha(*in))
+      ++in;
+   if (*in == '\0')
+      return key;
+
+   /* Pull out the first letter, uppercase it, and 
+      set up for main loop */
+   key[0] = toupper(*in);
+   last = code[key[0] - 'A'];
+   ++in;
+
+   /* Scan rest of string, stop at end of string or 
+      when the key is full */
+   for (count = 1;  count < 4  &&  *in != '\0';  ++in) {
+      /* If non-alpha, ignore the character altogether */
+      if (isalpha(*in)) {
+         ch = tolower(*in);
+         /* Fold together adjacent letters sharing the same code */
+         if (last != code[ch - 'a']) {
+            last = code[ch - 'a'];
+            /* Ignore code==0 letters except as separators */
+            if (last != 0)
+               key[count++] = '0' + last;
+         }
+      }
+   }
+
+   return key;
+}
+
